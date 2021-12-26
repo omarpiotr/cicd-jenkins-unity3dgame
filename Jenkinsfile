@@ -5,7 +5,7 @@ pipeline {
         //IMAGE_TAG = "ajc-2.1"
         /*STAGING = "omar-ajc-staging-env"
         PRODUCTION = "omar-ajc-prod-env"*/
-        USERNAME = "omarpiotrdeveloper"
+        //USERNAME = "omarpiotrdeveloper"
         CONTAINER_NAME = "unity3dgame"
         EC2_PRODUCTION_HOST = "omar-production.ddns.net"
     }
@@ -19,20 +19,26 @@ pipeline {
            agent any
            steps 
            {
-               script  {sh 'docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .' }
+               withCredentials([usernamePassword(credentialsId: dockerhub_password, usernameVariable: 'USERNAME')])
+               {
+                    script  {sh 'docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .' }
+               }
            }    
        }
 
        stage ('Run test container') {
            agent any
            steps {
-               script{
-                   sh '''
-                       docker stop $CONTAINER_NAME || true
-                       docker rm $CONTAINER_NAME || true
-                       docker run --name $CONTAINER_NAME -d -p 80:80 $USERNAME/$IMAGE_NAME:$BUILD_TAG
-                       sleep 5
-                   '''
+               withCredentials([usernamePassword(credentialsId: dockerhub_password, usernameVariable: 'USERNAME')])
+               {
+                    script{
+                        sh '''
+                            docker stop $CONTAINER_NAME || true
+                            docker rm $CONTAINER_NAME || true
+                            docker run --name $CONTAINER_NAME -d -p 80:80 $USERNAME/$IMAGE_NAME:$BUILD_TAG
+                            sleep 5
+                        '''
+                    }
                }
            }
        }
@@ -48,25 +54,25 @@ pipeline {
            }
        }
 
-      /*stage ('clean env and save artifact') {
+      stage ('clean env and save artifact') {
            agent any
-           environment{
-               PASSWORD = credentials('dockerhub_password')
-           }
            steps {
-               script{
-                   sh '''
-                       docker login -u $USERNAME -p $PASSWORD
-                       docker push $USERNAME/$IMAGE_NAME:$BUILD_TAG
-                       # docker stop $CONTAINER_NAME || true
-                       # docker rm $CONTAINER_NAME || true
-                       # docker rmi $USERNAME/$IMAGE_NAME:$BUILD_TAG
-                   '''
+               withCredentials([usernamePassword(credentialsId: dockerhub_password, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
+               {
+                    script{
+                        sh '''
+                            docker login -u $USERNAME -p $PASSWORD
+                            docker push $USERNAME/$IMAGE_NAME:$BUILD_TAG
+                            # docker stop $CONTAINER_NAME || true
+                            # docker rm $CONTAINER_NAME || true
+                            # docker rmi $USERNAME/$IMAGE_NAME:$BUILD_TAG
+                        '''
+                    }
                }
            }
        }
 
-       stage('Deploy app on EC2-cloud Production ') {
+       /*stage('Deploy app on EC2-cloud Production ') {
             agent any
             when{
                 expression{ GIT_BRANCH == 'origin/master'}
