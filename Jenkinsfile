@@ -19,7 +19,7 @@ pipeline {
            agent any
            steps 
            {
-               withCredentials([usernamePassword(credentialsId: 'dockerhub_password', usernameVariable: 'USERNAME')])
+               withCredentials([usernamePassword(credentialsId: 'dockerhub_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
                {
                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         script  {sh 'docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .' }
@@ -31,7 +31,7 @@ pipeline {
        stage ('Run test container') {
            agent any
            steps {
-               withCredentials([usernamePassword(credentialsId: 'dockerhub_password', usernameVariable: 'USERNAME')])
+               withCredentials([usernamePassword(credentialsId: 'dockerhub_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
                {
                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         script{
