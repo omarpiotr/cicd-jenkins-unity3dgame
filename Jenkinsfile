@@ -58,10 +58,10 @@ pipeline {
            }
        }
 
-      stage ('clean env and save artifact') {
+      stage ('save artifact') {
            agent any
            steps {
-               withCredentials([usernamePassword(credentialsId: dockerhub_password, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
+               withCredentials([usernamePassword(credentialsId: 'dockerhub_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
                {
                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                         script{
