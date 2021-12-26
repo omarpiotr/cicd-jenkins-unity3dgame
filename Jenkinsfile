@@ -19,9 +19,11 @@ pipeline {
            agent any
            steps 
            {
-               withCredentials([usernamePassword(credentialsId: dockerhub_password, usernameVariable: 'USERNAME')])
+               withCredentials([usernamePassword(credentialsId: 'dockerhub_password', usernameVariable: 'USERNAME')])
                {
-                    script  {sh 'docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .' }
+                   catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        script  {sh 'docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .' }
+                   }
                }
            }    
        }
@@ -29,16 +31,18 @@ pipeline {
        stage ('Run test container') {
            agent any
            steps {
-               withCredentials([usernamePassword(credentialsId: dockerhub_password, usernameVariable: 'USERNAME')])
+               withCredentials([usernamePassword(credentialsId: 'dockerhub_password', usernameVariable: 'USERNAME')])
                {
-                    script{
-                        sh '''
-                            docker stop $CONTAINER_NAME || true
-                            docker rm $CONTAINER_NAME || true
-                            docker run --name $CONTAINER_NAME -d -p 80:80 $USERNAME/$IMAGE_NAME:$BUILD_TAG
-                            sleep 5
-                        '''
-                    }
+                   catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        script{
+                            sh '''
+                                docker stop $CONTAINER_NAME || true
+                                docker rm $CONTAINER_NAME || true
+                                docker run --name $CONTAINER_NAME -d -p 80:80 $USERNAME/$IMAGE_NAME:$BUILD_TAG
+                                sleep 5
+                            '''
+                        }
+                   }
                }
            }
        }
@@ -54,6 +58,7 @@ pipeline {
            }
        }
 
+    /*
       stage ('clean env and save artifact') {
            agent any
            steps {
@@ -72,7 +77,7 @@ pipeline {
            }
        }
 
-       /*stage('Deploy app on EC2-cloud Production ') {
+       stage('Deploy app on EC2-cloud Production ') {
             agent any
             when{
                 expression{ GIT_BRANCH == 'origin/master'}
