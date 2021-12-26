@@ -19,7 +19,7 @@ pipeline {
            agent any
            steps 
            {
-               script  {sh 'docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .' } }
+               script  {sh 'docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .' }
            }    
        }
 
