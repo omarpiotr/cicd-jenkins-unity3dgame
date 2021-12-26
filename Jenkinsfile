@@ -85,7 +85,7 @@ pipeline {
             }
             steps{
                 withCredentials([
-                    sshUserPrivateKey(credentialsId: "ec2_prod_private_key", keyFileVariable: 'keyfile', usernameVariable: 'NUSER',
+                    sshUserPrivateKey(credentialsId: "ec2_prod_private_key", keyFileVariable: 'keyfile', usernameVariable: 'NUSER'),
                     usernamePassword(credentialsId: 'dockerhub_password', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) 
                 {
                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
