@@ -19,18 +19,7 @@ pipeline {
            agent any
            steps 
            {
-               withCredentials([ sshUserPrivateKey(credentialsId: "ec2_prod_private_key", keyFileVariable: 'keyfile', usernameVariable: 'NUSER')])
-               {
-                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') 
-                    {
-                        script
-                        {
-                            sh '''
-                            ssh -o StrictHostKeyChecking=no -i ${keyfile} ${NUSER}@${EC2_PRODUCTION_HOST} docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .
-                            '''
-                        }
-                    }
-                }
+               script  {sh 'docker build -t $USERNAME/$IMAGE_NAME:$BUILD_TAG .' } }
            }    
        }
 
