@@ -58,24 +58,27 @@ pipeline {
            }
        }
 
-    /*
       stage ('clean env and save artifact') {
            agent any
            steps {
                withCredentials([usernamePassword(credentialsId: dockerhub_password, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])
                {
-                    script{
-                        sh '''
-                            docker login -u $USERNAME -p $PASSWORD
-                            docker push $USERNAME/$IMAGE_NAME:$BUILD_TAG
-                            # docker stop $CONTAINER_NAME || true
-                            # docker rm $CONTAINER_NAME || true
-                            # docker rmi $USERNAME/$IMAGE_NAME:$BUILD_TAG
-                        '''
-                    }
+                   catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        script{
+                            sh '''
+                                docker login -u $USERNAME -p $PASSWORD
+                                docker push $USERNAME/$IMAGE_NAME:$BUILD_TAG
+                                # docker stop $CONTAINER_NAME || true
+                                # docker rm $CONTAINER_NAME || true
+                                # docker rmi $USERNAME/$IMAGE_NAME:$BUILD_TAG
+                            '''
+                        }
+                   }
                }
            }
        }
+
+       /*
 
        stage('Deploy app on EC2-cloud Production ') {
             agent any
