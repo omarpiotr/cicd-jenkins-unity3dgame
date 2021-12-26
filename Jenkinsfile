@@ -23,14 +23,14 @@ pipeline {
            }    
        }
 
-       /*stage ('Run test container') {
+       stage ('Run test container') {
            agent any
            steps {
                script{
                    sh '''
                        docker stop $CONTAINER_NAME || true
                        docker rm $CONTAINER_NAME || true
-                       docker run --name $CONTAINER_NAME -d -e PORT=5000 -p 5000:5000 $USERNAME/$IMAGE_NAME:$BUILD_TAG
+                       docker run --name $CONTAINER_NAME -d -p 80:80 $USERNAME/$IMAGE_NAME:$BUILD_TAG
                        sleep 5
                    '''
                }
@@ -42,13 +42,13 @@ pipeline {
            steps {
                script{
                    sh '''
-                       curl http://localhost:5000 | grep -iq "Hello world!"
+                       curl http://localhost | grep -iq "ClickAndDestroy"
                    '''
                }
            }
        }
 
-       stage ('clean env and save artifact') {
+      /*stage ('clean env and save artifact') {
            agent any
            environment{
                PASSWORD = credentials('dockerhub_password')
